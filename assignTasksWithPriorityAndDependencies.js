@@ -45,8 +45,8 @@ const assignTasksWithPriorityAndDependencies = (developers, tasks) =>{
             if (task.difficulty <= developer.skillLevel){
                 assigned.forEach(a => {
                     if (a.name === developer.name) {
-                        a.assignedTasks.push(task.taskName); // Add task name
-                        a.totalHours += task.hoursRequired; // Increment total hours
+                        a.assignedTasks.push(task.taskName);
+                        a.totalHours += task.hoursRequired;
                     }
                 });
                 taskAssigned = true;
