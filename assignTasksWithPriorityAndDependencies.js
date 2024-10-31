@@ -9,7 +9,7 @@ const sort_tasks = (tasks) =>{
     tasks.forEach(task => {
         task.dependencies.forEach(dep => {
             if (inDegree.has(dep)) {
-                inDegree.set(dep, inDegree.get(dep) + 1);
+                inDegree.set(task.taskName, inDegree.get(task.taskName) + 1);
             }
         });
     });
@@ -18,7 +18,6 @@ const sort_tasks = (tasks) =>{
     while (queue.length) {
         const taskName = queue.shift();
         sorted.push(taskMap.get(taskName));
-
         tasks.forEach(task => {
             if (task.dependencies.includes(taskName)) {
                 inDegree.set(task.taskName, inDegree.get(task.taskName) - 1);
@@ -39,28 +38,25 @@ const assignTasksWithPriorityAndDependencies = (developers, tasks) =>{
     }));
     unassignedTasks = [];
     const sortedTasks = sort_tasks(tasks);
-    sortedTasks.forEach(task =>{
-        let taskAssigned = false;
-        developers.forEach(developer =>{
-            if (task.difficulty <= developer.skillLevel){
-                assigned.forEach(a => {
-                    if (a.name === developer.name) {
-                        a.assignedTasks.push(task.taskName);
-                        a.totalHours += task.hoursRequired;
-                    }
-                });
-                taskAssigned = true;
-                return;
+    sortedTasks.forEach(task => {
+        let assignedToDeveloper = false;
+        for (let dev of assigned) {
+            const developer = developers.find(d => d.name === dev.name);
+            if (developer.skillLevel >= task.difficulty &&
+                dev.totalHours + task.hoursRequired <= developer.maxHours) {
+                
+                dev.assignedTasks.push(task.taskName);
+                dev.totalHours += task.hoursRequired;
+                assignedToDeveloper = true;
+                break;
             }
-        });
-        if (!taskAssigned) {
+        }
+        if (!assignedToDeveloper) {
             unassignedTasks.push(task.taskName);
         }
-    })
-    return {
-        assigned,
-        unassignedTasks
-    };
+    });
+
+    return { assigned, unassignedTasks };
 }
 
 const developers = [
@@ -79,3 +75,7 @@ const tasks = [
 
 const matching = assignTasksWithPriorityAndDependencies(developers, tasks);
 console.log(matching);
+matching.assigned.forEach(matched => {
+    console.log('matched: ', matched);
+    
+});
